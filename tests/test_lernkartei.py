@@ -35,7 +35,7 @@ class Anonymisieren(unittest.TestCase):
         self.assertEqual(pruefe_oeffentlich(self.daten), [])
         self.assertNotIn("dateien", self.daten)
         thema = next(alle_themen(self.daten))
-        self.assertEqual(thema["lehrkraft"], "")
+        self.assertEqual(thema["lehrkraft"], "Unterricht")
         self.assertEqual(thema["quellen"], ["Lagerung.docx"])
 
     def test_formulierungen(self):

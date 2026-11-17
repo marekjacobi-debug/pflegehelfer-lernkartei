@@ -20,7 +20,7 @@ Was passiert:
   - "Unterricht Frau X"            -> "Unterricht"
   - "von/bei/laut … Frau X"        -> "von/bei/laut … der Lehrkraft"
   - "Frau X", "Herr X", "X"        -> "Lehrkraft"
-  - Feld "lehrkraft"               -> leer
+  - Feld "lehrkraft"               -> "Unterricht"
   - "quellen"                      -> nur noch der Dateiname (ohne Ordner)
   - "dateien" (Verarbeitungsstand) -> entfernt
 Am Ende wird geprüft, dass kein Name mehr vorkommt. Sonst bricht das Skript ab.
@@ -31,6 +31,7 @@ import re
 import sys
 
 TITEL = r"(?:Frau|Herr|Fr\.|Hr\.)"
+NEUTRAL = "Unterricht"  # steht in der App statt der Lehrkraft
 NAME_NACH_TITEL = re.compile(TITEL + r"\s+([A-ZÄÖÜ][\wäöüß-]+)")
 
 
@@ -77,7 +78,7 @@ def _muster(namen):
 def _regeln(namen, nur_titel=()):
     n = _muster(namen)
     regeln = [
-        ("Unterricht", re.compile(rf"\b(Unterricht(?:sstunde)?)\s+(?:(?:bei|von)\s+)?{TITEL}\s+{n}"), r"\1"),
+        ("Unterricht", re.compile(rf"\b(Unterricht(?:sstunde)?|Unterlagen)\s+(?:(?:bei|von)\s+)?{TITEL}\s+{n}"), r"\1"),
         ("Präposition", re.compile(rf"\b((?i:von|bei|mit|laut|nach))\s+{TITEL}\s+{n}"), r"\1 der Lehrkraft"),
         ("Titel+Name", re.compile(rf"(?<![\w]){TITEL}\s+{n}"), "Lehrkraft"),
     ]
@@ -152,7 +153,7 @@ def anonymisieren(daten, extra_namen=(), ausgedacht=(), nur_titel=()):
     daten.pop("dateien", None)
     for thema in alle_themen(daten):
         if "lehrkraft" in thema:
-            thema["lehrkraft"] = ""
+            thema["lehrkraft"] = NEUTRAL
         thema["quellen"] = [str(q).split("/")[-1] for q in thema.get("quellen", [])]
 
     if not namen:
@@ -202,7 +203,7 @@ def pruefe_oeffentlich(daten):
         probleme.append('Feld "dateien" darf nicht in der öffentlichen Datei stehen')
     for thema in alle_themen(daten):
         tid = thema.get("id", "?")
-        if thema.get("lehrkraft"):
+        if thema.get("lehrkraft") not in (None, "", NEUTRAL):
             probleme.append(f'{tid}: Feld "lehrkraft" ist nicht leer')
         for quelle in thema.get("quellen", []):
             if "/" in str(quelle):
