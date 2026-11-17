@@ -10,6 +10,8 @@ Lehrkräfte, die nur im Text erwähnt werden, kommen in eine private Namensliste
 Sie wird automatisch gelesen, wenn sie als "lehrkraefte_privat.txt" neben der
 Original-Datei liegt, oder mit --namen angegeben. Diese Liste gehört NICHT ins Repo.
     Frau Beispiel      <- Lehrkraft: wird ersetzt
+    titel: Frau Wald   <- Lehrkraft, deren Name auch ein normales Wort ist:
+                          nur "Frau Wald" wird ersetzt, "der Wald" bleibt
     ok: Schulz         <- ausgedachter Name (z. B. in einer Quizfrage): bleibt stehen
 Steht außerhalb der Fallbeispiele ein "Frau/Herr X", der in keiner der beiden Gruppen
 ist, bricht das Skript ab und schreibt nichts.
@@ -67,15 +69,22 @@ def namen_finden(daten):
     return namen, ohne_titel
 
 
-def _regeln(namen):
+def _muster(namen):
     liste = "|".join(re.escape(n) for n in sorted(namen, key=len, reverse=True))
-    n = rf"(?:{liste})s?\b"  # mit Genitiv-s
-    return [
+    return rf"(?:{liste})s?\b"  # mit Genitiv-s
+
+
+def _regeln(namen, nur_titel=()):
+    n = _muster(namen)
+    regeln = [
         ("Unterricht", re.compile(rf"\b(Unterricht(?:sstunde)?)\s+(?:(?:bei|von)\s+)?{TITEL}\s+{n}"), r"\1"),
         ("Präposition", re.compile(rf"\b((?i:von|bei|mit|laut|nach))\s+{TITEL}\s+{n}"), r"\1 der Lehrkraft"),
         ("Titel+Name", re.compile(rf"(?<![\w]){TITEL}\s+{n}"), "Lehrkraft"),
-        ("Name allein", re.compile(rf"\b{n}"), "Lehrkraft"),
     ]
+    allein = set(namen) - set(nur_titel)
+    if allein:
+        regeln.append(("Name allein", re.compile(rf"\b{_muster(allein)}"), "Lehrkraft"))
+    return regeln
 
 
 def _aufraeumen(text, svg=False):
@@ -110,21 +119,29 @@ def verdaechtige_namen(daten, namen):
 
 
 def namensliste_lesen(pfad):
-    """-> (Lehrkräfte, ausgedachte Namen). Zeilen: 'Frau X' / 'X' oder 'ok: X'."""
-    lehrkraefte, ok = set(), set()
+    """-> (Lehrkräfte, ausgedachte Namen, Lehrkräfte nur mit Titel ersetzen).
+    Zeilen: 'Frau X' / 'X', 'titel: X' oder 'ok: X'."""
+    lehrkraefte, ok, nur_titel = set(), set(), set()
+
+    def woerter(rest):
+        return [w for w in rest.replace(",", " ").split() if w[:1].isupper() and w not in ("Frau", "Herr")]
+
     with open(pfad, encoding="utf-8") as f:
         for zeile in f:
             zeile = zeile.split("#")[0].strip()
             if not zeile:
                 continue
             if zeile.lower().startswith("ok:"):
-                ok.update(w for w in zeile[3:].replace(",", " ").split() if w[:1].isupper())
+                ok.update(woerter(zeile[3:]))
+            elif zeile.lower().startswith("titel:"):
+                nur_titel.update(woerter(zeile[6:]))
+                lehrkraefte.update(woerter(zeile[6:]))
             else:
                 lehrkraefte.add(zeile.split()[-1])  # "Frau X" oder "X" -> "X"
-    return lehrkraefte, ok
+    return lehrkraefte, ok, nur_titel
 
 
-def anonymisieren(daten, extra_namen=(), ausgedacht=()):
+def anonymisieren(daten, extra_namen=(), ausgedacht=(), nur_titel=()):
     """Gibt (bereinigte Daten, Bericht) zurück. Die Eingabe wird nicht verändert."""
     namen, ohne_titel = namen_finden(daten)
     namen |= set(extra_namen)
@@ -140,7 +157,7 @@ def anonymisieren(daten, extra_namen=(), ausgedacht=()):
 
     if not namen:
         return daten, bericht
-    regeln = _regeln(namen)
+    regeln = _regeln(namen, nur_titel)
 
     def bearbeite(wert, ort):
         if isinstance(wert, str):
@@ -162,7 +179,10 @@ def anonymisieren(daten, extra_namen=(), ausgedacht=()):
         return wert
 
     daten = bearbeite(daten, "")
-    rest = namen_im_text(json.dumps(daten, ensure_ascii=False), namen)
+    text = json.dumps(daten, ensure_ascii=False)
+    rest = namen_im_text(text, set(namen) - set(nur_titel))
+    if set(nur_titel) & namen:
+        rest += re.findall(rf"(?<![\w]){TITEL}\s+{_muster(set(nur_titel) & namen)}", text)
     if rest:
         raise ValueError("Namen noch vorhanden: %d Stelle(n) – bitte prüfen" % len(rest))
     return daten, bericht
@@ -204,10 +224,10 @@ def main(argv):
     if namen_datei is None:
         standard = os.path.join(os.path.dirname(os.path.abspath(quelle)), "lehrkraefte_privat.txt")
         namen_datei = standard if os.path.exists(standard) else None
-    extra, ausgedacht = namensliste_lesen(namen_datei) if namen_datei else (set(), set())
+    extra, ausgedacht, nur_titel = namensliste_lesen(namen_datei) if namen_datei else (set(), set(), set())
     with open(quelle, encoding="utf-8") as f:
         original = json.load(f)
-    daten, bericht = anonymisieren(original, extra, ausgedacht)
+    daten, bericht = anonymisieren(original, extra, ausgedacht, nur_titel)
     if bericht["verdacht"]:
         print("NICHTS GESCHRIEBEN – diese Namen stehen außerhalb der Fallbeispiele und sind unbekannt:",
               *("Frau/Herr " + n for n in bericht["verdacht"]),

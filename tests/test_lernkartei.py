@@ -11,7 +11,7 @@ import unittest
 WURZEL = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(WURZEL))
 
-from anonymisieren import alle_themen, anonymisieren, namen_im_text, pruefe_oeffentlich  # noqa: E402
+from anonymisieren import alle_themen, anonymisieren, namen_im_text, namensliste_lesen, pruefe_oeffentlich  # noqa: E402
 from bauen import seite_bauen  # noqa: E402
 
 BEISPIEL = WURZEL / "tests" / "beispiel"
@@ -50,6 +50,18 @@ class Anonymisieren(unittest.TestCase):
         self.assertEqual(bericht["verdacht"], ["Birke"])  # Frau Schulz (Fallbeispiel) wird nicht gemeldet
         _, bericht = anonymisieren(beispiel_daten(), ausgedacht={"Birke"})
         self.assertEqual(bericht["verdacht"], [])
+
+    def test_name_der_auch_ein_wort_ist(self):
+        daten, _ = anonymisieren(beispiel_daten(), {"Birke"}, nur_titel={"Birke"})
+        thema = next(alle_themen(daten))
+        self.assertEqual(thema["hinweis"], "Ergänzt nach Rücksprache mit der Lehrkraft.")
+        self.assertIn("Eine Birke biegt sich", thema["karten"][1]["a"])
+
+    def test_namensliste(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            datei = pathlib.Path(tmp) / "lehrkraefte_privat.txt"
+            datei.write_text("# Kommentar\nFrau Ahorn\ntitel: Herr Birke\nok: Schulz, Meier\n", encoding="utf-8")
+            self.assertEqual(namensliste_lesen(datei), ({"Ahorn", "Birke"}, {"Schulz", "Meier"}, {"Birke"}))
 
     def test_ausgedachte_patientennamen_bleiben(self):
         thema = next(alle_themen(self.daten))

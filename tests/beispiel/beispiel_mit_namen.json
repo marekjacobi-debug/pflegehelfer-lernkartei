@@ -1,17 +1,102 @@
 {
  "stand": "2026-11-16",
- "tags": ["Bewegung", "Prophylaxen"],
- "dateien": [{"pfad": "Lernfeld 02/Lernfeldeinheit 2.1/Frau Ahorn/Lagerung.docx", "mtime": 1794398190, "status": "verarbeitet"}],
- "lernfelder": [{"id": "LF02", "titel": "Lernfeld 02", "einheiten": [{"id": "2.1", "titel": "Lernfeldeinheit 2.1", "themen": [{
-  "id": "lagerung", "titel": "Lagerung", "tags": ["Bewegung"], "lehrkraft": "Frau Ahorn",
-  "quellen": ["Lernfeld 02/Lernfeldeinheit 2.1/Frau Ahorn/Lagerung.docx"],
-  "hinweis": "Ergänzt nach Rücksprache mit Herr Birke.",
-  "merksaetze": ["Lagern heißt Druck verteilen.", "Haut regelmäßig beobachten.", "Auffälligkeiten der Fachkraft melden."],
-  "zettel": [{"h": "Grundsätze", "punkte": ["Laut Frau Ahorn alle 2 Stunden umlagern.", "Frau Ahorn hat das vorgemacht."]}],
-  "grafiken": [{"id": "lagerung-g1", "titel": "Lagerung", "nach": "Grundsätze", "notiz": "Grafik erklären.",
-   "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1600 900\"><text x=\"60\" y=\"876\" font-family=\"Carlito, Calibri, sans-serif\">Quelle: Unterricht Frau Ahorn (Lagerung)</text></svg>"}],
-  "karten": [{"id": "lagerung-k1", "f": "Was ist die 30°-Lagerung?", "a": "Seitenlage mit 30° Neigung zur Druckentlastung."}],
-  "quiz": [{"id": "lagerung-q1", "f": "Wozu dient Lagerung?", "optionen": ["Druckentlastung", "Unterhaltung", "Diagnose", "Abrechnung"], "erklaerung": "Lagerung verteilt Druck."}],
-  "faelle": [{"id": "lagerung-f1", "titel": "Frau Schulz", "stufe": "leicht", "situation": "Frau Schulz (82) liegt seit drei Tagen im Bett.", "fragen": [{"f": "Was beobachtest du?", "a": "Haut an Kreuzbein und Fersen."}]}]
- }]}]}]
+ "tags": [
+  "Bewegung",
+  "Prophylaxen"
+ ],
+ "dateien": [
+  {
+   "pfad": "Lernfeld 02/Lernfeldeinheit 2.1/Frau Ahorn/Lagerung.docx",
+   "mtime": 1794398190,
+   "status": "verarbeitet"
+  }
+ ],
+ "lernfelder": [
+  {
+   "id": "LF02",
+   "titel": "Lernfeld 02",
+   "einheiten": [
+    {
+     "id": "2.1",
+     "titel": "Lernfeldeinheit 2.1",
+     "themen": [
+      {
+       "id": "lagerung",
+       "titel": "Lagerung",
+       "tags": [
+        "Bewegung"
+       ],
+       "lehrkraft": "Frau Ahorn",
+       "quellen": [
+        "Lernfeld 02/Lernfeldeinheit 2.1/Frau Ahorn/Lagerung.docx"
+       ],
+       "hinweis": "Ergänzt nach Rücksprache mit Herr Birke.",
+       "merksaetze": [
+        "Lagern heißt Druck verteilen.",
+        "Haut regelmäßig beobachten.",
+        "Auffälligkeiten der Fachkraft melden."
+       ],
+       "zettel": [
+        {
+         "h": "Grundsätze",
+         "punkte": [
+          "Laut Frau Ahorn alle 2 Stunden umlagern.",
+          "Frau Ahorn hat das vorgemacht."
+         ]
+        }
+       ],
+       "grafiken": [
+        {
+         "id": "lagerung-g1",
+         "titel": "Lagerung",
+         "nach": "Grundsätze",
+         "notiz": "Grafik erklären.",
+         "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1600 900\"><text x=\"60\" y=\"876\" font-family=\"Carlito, Calibri, sans-serif\">Quelle: Unterricht Frau Ahorn (Lagerung)</text></svg>"
+        }
+       ],
+       "karten": [
+        {
+         "id": "lagerung-k1",
+         "f": "Was ist die 30°-Lagerung?",
+         "a": "Seitenlage mit 30° Neigung zur Druckentlastung."
+        },
+        {
+         "id": "lagerung-k2",
+         "f": "Merkhilfe aus der Natur?",
+         "a": "Eine Birke biegt sich im Wind, statt zu brechen."
+        }
+       ],
+       "quiz": [
+        {
+         "id": "lagerung-q1",
+         "f": "Wozu dient Lagerung?",
+         "optionen": [
+          "Druckentlastung",
+          "Unterhaltung",
+          "Diagnose",
+          "Abrechnung"
+         ],
+         "erklaerung": "Lagerung verteilt Druck."
+        }
+       ],
+       "faelle": [
+        {
+         "id": "lagerung-f1",
+         "titel": "Frau Schulz",
+         "stufe": "leicht",
+         "situation": "Frau Schulz (82) liegt seit drei Tagen im Bett.",
+         "fragen": [
+          {
+           "f": "Was beobachtest du?",
+           "a": "Haut an Kreuzbein und Fersen."
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
 }
