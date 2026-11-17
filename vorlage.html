@@ -339,6 +339,7 @@ var INTERVALS=[0,1,3,7,16,35];
 var NEW_PER_SESSION=20;
 var NOTEN=[[92,1],[81,2],[67,3],[50,4],[30,5],[0,6]]; // Prozent → Note (nach Notenschlüssel aus dem Arbeitsauftrag 63/58/51/42/32/19)
 var OFFLINE=location.protocol==="file:";
+var WEBSEITE=typeof PRAES!=="undefined"; // öffentliche Webseite (GitHub Pages): Drucken und Herunterladen erlaubt
 var C=null, topics=[], TAGS=[], tagFilter=null, suche="", cardIndex={}, quizIndex={}, lueckIndex={}, zuIndex={};
 var P={karten:{},quiz:{},luecken:{},zuordnen:{},verlauf:[],zuletzt:null};
 var db=null, uid=null, saveTimer=null, saving=false, saveAgain=false, dl=null;
@@ -695,7 +696,7 @@ function search(q){
 function renderSheets(){
   var v=$("#view-zettel");v.textContent="";
   var input=el("input",{type:"search",id:"suche",placeholder:"Lernfeldeinheit (z. B. 2.1 oder Mobilität) oder Stichwort, z. B. „Händedesinfektion“",value:searchQ,"aria-label":"Suche"});
-  var bar=el("div",{class:"searchbar"},[input,(OFFLINE||dl)?el("button",{class:"btn",onclick:function(){openPrintDialog("alle")}},["Drucken / Herunterladen"]):null]);
+  var bar=el("div",{class:"searchbar"},[input,(OFFLINE||WEBSEITE||dl)?el("button",{class:"btn",onclick:function(){openPrintDialog("alle")}},["Drucken / Herunterladen"]):null]);
   v.appendChild(bar);
   var body=el("div",{});v.appendChild(body);
   function draw(){
@@ -725,7 +726,7 @@ function renderSheets(){
     sheet.appendChild(el("div",{class:"toolbar"},[
       el("button",{class:"btn primary",onclick:function(){startSession("t:"+t.id,"alle")}},["Karten zu diesem Thema"]),
       el("button",{class:"btn",onclick:function(){show("ueben");renderPracticeStart("t:"+t.id)}},["Üben"]),
-      (OFFLINE||dl)?el("button",{class:"btn",onclick:function(){openPrintDialog("t:"+t.id)}},["Drucken / Herunterladen"]):null
+      (OFFLINE||WEBSEITE||dl)?el("button",{class:"btn",onclick:function(){openPrintDialog("t:"+t.id)}},["Drucken / Herunterladen"]):null
     ]));
     body.appendChild(el("div",{class:"sheet-layout"},[toc,sheet]));
   }
@@ -838,7 +839,7 @@ function openPrintDialog(scope){
     var ts=druckThemen(sel.value),n=ts.reduce(function(a,t){return a+t.karten.length},0),p=druckSeiten(sel.value,x);
     var nf=ts.reduce(function(a,t){return a+(t.faelle||[]).length},0);
     info.textContent=ts.length+(ts.length===1?" Thema":" Themen")+(x.art==="faelle"?" · "+nf+" Fallbeispiele":" · "+n+" Karten")+(p?" · "+p+" Seiten Karten"+(x.layout==="duplex"?" ("+(p/2)+" Blatt)":""):"")+
-      (OFFLINE?"":" · Die heruntergeladene Datei öffnest du im Browser und druckst sie dort oder speicherst sie als PDF.");
+      (OFFLINE||WEBSEITE?"":" · Die heruntergeladene Datei öffnest du im Browser und druckst sie dort oder speicherst sie als PDF.");
   }
   function go(how){
     var x=read();prefSet("druck-art",x.art);prefSet("druck-layout",x.layout);prefSet("druck-zettel",x.zettel?"1":"0");prefSet("druck-qa",x.qa?"1":"0");prefSet("druck-loes",x.loes?"1":"0");
@@ -846,11 +847,11 @@ function openPrintDialog(scope){
     var name=(x.art==="basteln"?"Karteikarten zum Basteln – ":x.art==="faelle"?"Fallbeispiele – ":"Lernzettel – ")+scopeName(sel.value).replace(/[\\\/:*?"<>|#]/g,"").trim()+".html";
     if(how==="print"){d.close();printDoc(html);return}
     if(dl){dl.save({filename:name,data:html}).then(function(){d.close()}).catch(function(e){info.textContent=e&&e.code==="declined"?"Herunterladen abgebrochen.":"Herunterladen ist hier gerade nicht möglich."});return}
-    var a=el("a",{href:URL.createObjectURL(new Blob([html],{type:"text/html"})),download:name});document.body.appendChild(a);a.click();a.remove();d.close();
+    var a=el("a",{href:URL.createObjectURL(new Blob([html],{type:"text/html;charset=utf-8"})),download:name});document.body.appendChild(a);a.click();setTimeout(function(){a.remove()},1000);d.close();
   }
   acts.appendChild(el("button",{class:"btn",type:"button",onclick:function(){d.close()}},["Abbrechen"]));
-  if(OFFLINE||dl)acts.appendChild(el("button",{class:"btn"+(OFFLINE?"":" primary"),type:"button",onclick:function(){go("save")}},["Herunterladen"]));
-  if(OFFLINE)acts.appendChild(el("button",{class:"btn primary",type:"button",onclick:function(){go("print")}},["Drucken"]));
+  if(OFFLINE||WEBSEITE||dl)acts.appendChild(el("button",{class:"btn"+(OFFLINE||WEBSEITE?"":" primary"),type:"button",onclick:function(){go("save")}},["Herunterladen"]));
+  if(OFFLINE||WEBSEITE)acts.appendChild(el("button",{class:"btn primary",type:"button",onclick:function(){go("print")}},["Drucken"]));
   form.addEventListener("change",update);
   d.addEventListener("close",function(){setTimeout(function(){d.remove()},50)});
   document.body.appendChild(d);update();d.showModal();
