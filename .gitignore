@@ -1,0 +1,11 @@
+# gebaute Seite (entsteht mit: python3 bauen.py)
+site/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Schutz: Originaldaten und private Namenslisten gehören NICHT ins öffentliche Repo
+*_privat.txt
+*_privat.json
+inhalte_original*.json
+roh/
