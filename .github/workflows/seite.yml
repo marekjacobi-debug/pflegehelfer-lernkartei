@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: pages
@@ -41,3 +43,18 @@ jobs:
           git add -A
           git commit -q -m "Seite aus ${GITHUB_SHA::7}"
           git push -q --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  veroeffentlichen:
+    # Falls in den Einstellungen "Source: GitHub Actions" gewählt ist
+    needs: bauen
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
