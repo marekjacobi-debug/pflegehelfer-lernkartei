@@ -122,6 +122,7 @@ select,input[type=text],input[type=search],textarea{background:var(--surface);co
 @media (max-width:780px){.sheet-layout{grid-template-columns:1fr}}
 .toc{display:flex;flex-direction:column;gap:2px;position:sticky;top:110px;align-self:start;max-height:calc(100vh - 130px);overflow:auto}
 @media (max-width:780px){.toc{position:static;max-height:none}}
+.toc .grp-rga{font-size:.78rem;color:var(--muted);margin:0 0 4px;line-height:1.3}
 .toc .grp{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 2px}
 .toc button{text-align:left;background:none;border:0;padding:6px 10px;border-radius:6px;color:var(--ink);cursor:pointer;font-size:.92rem}
 .toc button[aria-current="true"]{background:var(--accent-soft);color:var(--accent);font-weight:700}
@@ -513,7 +514,7 @@ function renderOverview(){
   v.appendChild(el("div",{class:"summary"},[left,right]));
   if(tagFilter&&TAGS.indexOf(tagFilter)<0)tagFilter=null;
   v.appendChild(el("div",{class:"suche",role:"search"},[
-    el("input",{type:"search",id:"suche",value:suche,placeholder:"Suchen: Lernfeldeinheit (z. B. 2.1 oder Mobilität), Thema oder Tag","aria-label":"Lernfeldeinheiten und Themen suchen",
+    el("input",{type:"search",id:"suche-start",value:suche,placeholder:"Suchen: Lernfeldeinheit (z. B. 2.1 oder Mobilität), Thema oder Tag","aria-label":"Lernfeldeinheiten und Themen suchen",
       oninput:function(){suche=this.value;sucheAnwenden()},onkeydown:function(ev){if(ev.key==="Escape"){this.value="";suche="";sucheAnwenden()}}}),
     el("p",{class:"suchinfo",id:"suchinfo","aria-live":"polite"})]));
   if(TAGS.length){
@@ -669,10 +670,17 @@ function openSheet(id){sheetId=id;searchQ="";show("zettel")}
 function hl(text,q){var safe=esc(text);if(!q)return safe;var words=q.trim().split(/\s+/).filter(function(w){return w.length>1}).map(function(w){return w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")});if(!words.length)return safe;return safe.replace(new RegExp("("+words.join("|")+")","gi"),"<mark>$1</mark>")}
 function search(q){
   var words=q.toLowerCase().split(/\s+/).filter(function(w){return w.length>1});if(!words.length)return[];
-  var hits=[];
+  var hits=[],einheitTreffer={};
   function test(s){s=s.toLowerCase();return words.every(function(w){return s.indexOf(w)>=0})}
+  var ew=suchNorm(q).trim().split(" ").filter(Boolean);
+  C.lernfelder.forEach(function(lf){lf.einheiten.forEach(function(e){
+    var rga=rgaEinheit(e.id);
+    var h=suchNorm([lf.titel,"lf "+lf.id.replace(/^LF0?/,""),e.titel,"lf "+e.id,e.id,rga?rga.titel+" "+rga.inh:""].join(" "));
+    if(!ew.every(function(x){return h.indexOf(x)>=0}))return;
+    e.themen.forEach(function(t){einheitTreffer[t.id]=1;hits.push({t:t,where:e.titel+(rga?" · "+rga.titel:""),text:t.zettel.map(function(z){return z.h}).join(" · ")})});
+  })});
   topics.forEach(function(t){
-    if(test(t.titel+" "+t.tags.join(" ")))hits.push({t:t,where:"Thema"+(t.tags.length?" · #"+t.tags.join(" #"):""),text:t.titel});
+    if(!einheitTreffer[t.id]&&test(t.titel+" "+t.tags.join(" ")))hits.push({t:t,where:"Thema"+(t.tags.length?" · #"+t.tags.join(" #"):""),text:t.titel});
     (t.merksaetze||[]).forEach(function(m){if(test(m))hits.push({t:t,where:"Merksatz",text:m})});
     (t.eselsbruecken||[]).forEach(function(m){if(test(m.e+" "+m.f))hits.push({t:t,where:"Eselsbrücke",text:m.e+" – "+m.f})});
     t.zettel.forEach(function(z){z.punkte.forEach(function(p){if(test(z.h+" "+p))hits.push({t:t,where:"Lernzettel · "+z.h,text:p})})});
@@ -683,7 +691,7 @@ function search(q){
 }
 function renderSheets(){
   var v=$("#view-zettel");v.textContent="";
-  var input=el("input",{type:"search",id:"suche",placeholder:"Alle Lernzettel und Karten durchsuchen, z. B. „Insulin“ oder „Händedesinfektion“",value:searchQ,"aria-label":"Suche"});
+  var input=el("input",{type:"search",id:"suche",placeholder:"Lernfeldeinheit (z. B. 2.1 oder Mobilität) oder Stichwort, z. B. „Händedesinfektion“",value:searchQ,"aria-label":"Suche"});
   var bar=el("div",{class:"searchbar"},[input,(OFFLINE||dl)?el("button",{class:"btn",onclick:function(){openPrintDialog("alle")}},["Drucken / Herunterladen"]):null]);
   v.appendChild(bar);
   var body=el("div",{});v.appendChild(body);
@@ -703,7 +711,9 @@ function renderSheets(){
     toc.appendChild(el("button",{"aria-current":(alleM&&!alleE)?"true":"false",onclick:function(){sheetId="__merk";draw();window.scrollTo(0,0)}},["★ Alle Merksätze"]));
     toc.appendChild(el("button",{"aria-current":alleE?"true":"false",onclick:function(){sheetId="__esel";draw();window.scrollTo(0,0)}},["★ Alle Eselsbrücken"]));
     C.lernfelder.forEach(function(lf){lf.einheiten.forEach(function(e){
+      var rga=rgaEinheit(e.id);
       toc.appendChild(el("div",{class:"grp",text:lf.titel.replace("Lernfeld ","LF ")+" · "+e.id}));
+      if(rga)toc.appendChild(el("div",{class:"grp-rga",text:rga.titel}));
       e.themen.forEach(function(x){toc.appendChild(el("button",{"aria-current":t&&x.id===t.id?"true":"false",onclick:function(){sheetId=x.id;draw();window.scrollTo(0,0)}},[x.titel]))});
     })});
     var sheet=el("article",{class:"sheet"});
