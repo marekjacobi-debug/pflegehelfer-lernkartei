@@ -63,4 +63,4 @@ und schreibt nichts. Ausgedachte Namen in Fallbeispielen bleiben immer stehen.
 
 ## Einmalig einrichten
 
-Auf github.com im Repo: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+Die Seite liegt im Zweig `gh-pages` (baut der Workflow bei jedem Push). Falls sie nicht erscheint: **Settings → Pages → Source: Deploy from a branch → gh-pages / (root)**.
