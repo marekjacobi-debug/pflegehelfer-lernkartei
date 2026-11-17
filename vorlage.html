@@ -255,6 +255,11 @@ span.chip.tag{cursor:default}
 .tagbar button:hover{border-color:var(--accent)}
 .tagbar button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .tagbar .n{font-family:var(--f-mono);font-weight:500;opacity:.7;margin-left:4px}
+.suche{margin-top:24px}
+.suche input[type=search]{width:100%;font:inherit;font-size:1rem;padding:10px 14px;border-radius:999px}
+.suche input[type=search]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.suchinfo{margin:8px 4px 0;color:var(--muted);font-size:.9rem}
+.lfe .rga{margin:-2px 0 6px;color:var(--muted);font-size:.88rem}
 .tagnote{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;color:var(--muted);font-size:.9rem}
 
 /* Fallbeispiele */
@@ -331,13 +336,25 @@ var INTERVALS=[0,1,3,7,16,35];
 var NEW_PER_SESSION=20;
 var NOTEN=[[92,1],[81,2],[67,3],[50,4],[30,5],[0,6]]; // Prozent → Note (nach Notenschlüssel aus dem Arbeitsauftrag 63/58/51/42/32/19)
 var OFFLINE=location.protocol==="file:";
-var C=null, topics=[], TAGS=[], tagFilter=null, cardIndex={}, quizIndex={}, lueckIndex={}, zuIndex={};
+var C=null, topics=[], TAGS=[], tagFilter=null, suche="", cardIndex={}, quizIndex={}, lueckIndex={}, zuIndex={};
 var P={karten:{},quiz:{},luecken:{},zuordnen:{},verlauf:[],zuletzt:null};
 var db=null, uid=null, saveTimer=null, saving=false, saveAgain=false, dl=null;
 var LSKEY="pflegehelfer-lernkartei-v1";
 
 function $(s,r){return (r||document).querySelector(s)}
 function el(tag,attrs,kids){var e=document.createElement(tag);if(attrs)for(var k in attrs){var v=attrs[k];if(v===false||v==null)continue;if(k==="class")e.className=v;else if(k==="text")e.textContent=v;else if(k==="html")e.innerHTML=v;else if(k.slice(0,2)==="on")e.addEventListener(k.slice(2),v);else e.setAttribute(k,v===true?"":v)}(kids||[]).forEach(function(c){if(c==null||c===false)return;e.appendChild(typeof c==="string"?document.createTextNode(c):c)});return e}
+function suchNorm(s){return String(s||"").toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").replace(/lernfeldeinheit|lfe/g,"lf ").replace(/lernfeld/g,"lf ").replace(/\blf\s*0?(\d)/g,"lf$1").replace(/\s+/g," ")}
+function rgaEinheit(id){if(typeof LEHRPLAN==="undefined")return null;for(var i=0;i<LEHRPLAN.length;i++)for(var j=0;j<LEHRPLAN[i].e.length;j++)if(LEHRPLAN[i].e[j].id===id)return LEHRPLAN[i].e[j];return null}
+function sucheAnwenden(){
+  var w=suchNorm(suche).trim().split(" ").filter(Boolean),treffer=0,einheiten=0;
+  document.querySelectorAll("#view-uebersicht .lf").forEach(function(lf){var lfSicht=false;
+    lf.querySelectorAll(".lfe").forEach(function(eb){var eSicht=false;
+      eb.querySelectorAll(".topic").forEach(function(t){var h=t.getAttribute("data-suche")||"";var ok=w.every(function(x){return h.indexOf(x)>=0});t.hidden=!ok;if(ok){eSicht=true;treffer++}});
+      eb.hidden=!eSicht;if(eSicht){lfSicht=true;einheiten++}});
+    lf.hidden=!lfSicht});
+  var info=document.getElementById("suchinfo");
+  if(info)info.textContent=!w.length?"":treffer?treffer+(treffer===1?" Thema":" Themen")+" in "+einheiten+(einheiten===1?" Lernfeldeinheit":" Lernfeldeinheiten"):"Keine Treffer. Probier z. B. „2.1“, „Mobilität“ oder „Hygiene“.";
+}
 function today(){return isoDay(new Date())}
 function isoDay(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function addDays(s,n){var d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return isoDay(d)}
@@ -495,6 +512,10 @@ function renderOverview(){
   ]);
   v.appendChild(el("div",{class:"summary"},[left,right]));
   if(tagFilter&&TAGS.indexOf(tagFilter)<0)tagFilter=null;
+  v.appendChild(el("div",{class:"suche",role:"search"},[
+    el("input",{type:"search",id:"suche",value:suche,placeholder:"Suchen: Lernfeldeinheit (z. B. 2.1 oder Mobilität), Thema oder Tag","aria-label":"Lernfeldeinheiten und Themen suchen",
+      oninput:function(){suche=this.value;sucheAnwenden()},onkeydown:function(ev){if(ev.key==="Escape"){this.value="";suche="";sucheAnwenden()}}}),
+    el("p",{class:"suchinfo",id:"suchinfo","aria-live":"polite"})]));
   if(TAGS.length){
     var bar=el("div",{class:"tagbar",role:"group","aria-label":"Nach Tag filtern"},[el("span",{class:"label",text:"Tags"}),
       el("button",{"aria-pressed":tagFilter?"false":"true",onclick:function(){tagFilter=null;prefSet("tag","");renderOverview()}},["Alle"])]);
@@ -512,13 +533,14 @@ function renderOverview(){
     var block=el("div",{class:"lf"},[el("div",{class:"lf-head"},[el("h2",{text:lf.titel}),el("span",{class:"mono",text:(ls.boxes[4]+ls.boxes[5])+"/"+ls.n+" sicher"})])]);
     lf.einheiten.forEach(function(e){
       if(tagFilter&&!e.themen.some(function(t){return t.tags.indexOf(tagFilter)>=0}))return;
-      var eb=el("div",{class:"lfe"},[el("p",{class:"label",text:e.titel})]);
+      var rga=rgaEinheit(e.id);
+      var eb=el("div",{class:"lfe"},[el("p",{class:"label",text:e.titel}),rga?el("p",{class:"rga",text:rga.titel}):null]);
       e.themen.forEach(function(t){
         if(tagFilter&&t.tags.indexOf(tagFilter)<0)return;
         var s=stats(t.karten),stack=el("div",{class:"stack",title:"Verteilung auf die Fächer"});
         [5,4,3,2,1].forEach(function(b){if(s.boxes[b])stack.appendChild(el("span",{style:"width:"+(s.boxes[b]/s.n*100)+"%;background:"+boxColor(b)}))});
         var extra=t.luecken.length+t.zuordnen.length;
-        eb.appendChild(el("div",{class:"topic"},[
+        eb.appendChild(el("div",{class:"topic","data-suche":suchNorm([lf.titel,"lf "+lf.id.replace(/^LF0?/,""),e.titel,"lf "+e.id,e.id,rga?rga.titel+" "+rga.inh:"",t.titel,t.tags.join(" "),t.zettel.map(function(z){return z.h}).join(" ")].join(" "))},[
           el("div",{style:"min-width:0"},[el("h3",{text:t.titel}),el("div",{class:"meta"},[
             el("span",{text:t.lehrkraft}),el("span",{class:"mono",text:"· "+t.karten.length+" Karten · "+t.quiz.length+" Fragen"+(extra?" · "+extra+" Aufgaben":"")+((t.faelle||[]).length?" · "+t.faelle.length+" Fälle":"")}),
             s.due?el("span",{class:"chip",text:s.due+" fällig"}):null,
@@ -536,6 +558,7 @@ function renderOverview(){
     });
     v.appendChild(block);
   });
+  sucheAnwenden();
   var fileIn=el("input",{type:"file",accept:".json,application/json",hidden:true,id:"import-file",onchange:function(e){if(e.target.files[0])importProgress(e.target.files[0])}});
   v.appendChild(el("div",{class:"statusline"},[
     el("span",{text:"Inhalte vom "+fmtDate(C.stand)+" · "+(C.dateien||[]).length+" Dateien aus deinem Mitschriften-Ordner"}),
