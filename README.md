@@ -27,6 +27,8 @@ site/index.html  →  GitHub Pages (automatisch bei jedem Push auf main)
 | `daten/inhalte.json` | alle Lerninhalte, **ohne** Namen der Lehrkräfte |
 | `anonymisieren.py` | Original → bereinigte Daten |
 | `bauen.py` | bereinigte Daten + Vorlage → `site/index.html` |
+| `praesentationen_bauen.sh`, `werkzeuge/` | baut die Präsentationen (ohne Namen) für den Reiter „Präsentationen“ |
+| `daten/vortraege.json` | Sprechernotizen, bereinigt |
 | `tests/` | prüft, dass keine Namen durchrutschen und die Seite baut |
 | `.github/workflows/seite.yml` | baut und veröffentlicht bei jedem Push |
 
@@ -35,7 +37,8 @@ site/index.html  →  GitHub Pages (automatisch bei jedem Push auf main)
 1. Die Lernkartei wie gewohnt in Dropbox pflegen (`Claude Code/lernkartei/inhalte.json`).
 2. Bereinigte Kopie erzeugen (im Ordner dieses Repos):
    ```bash
-   python3 anonymisieren.py ~/Dropbox/Pflegehelferausbildung/Claude\ Code/lernkartei/inhalte.json daten/inhalte.json
+   python3 anonymisieren.py ~/Dropbox/Pflegehelferausbildung/Claude\ Code/lernkartei/inhalte.json daten/inhalte.json \
+     --vortraege ~/Dropbox/Pflegehelferausbildung/Claude\ Code/lernkartei/vortraege_alle.json daten/vortraege.json
    ```
 3. Prüfen und ansehen:
    ```bash

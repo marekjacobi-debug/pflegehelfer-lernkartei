@@ -103,6 +103,15 @@ class EchteDaten(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             seite_bauen(WURZEL / "vorlage.html", WURZEL / "daten" / "inhalte.json", pathlib.Path(tmp) / "index.html")
 
+    def test_sprechernotizen_passen(self):
+        pfad = WURZEL / "daten" / "vortraege.json"
+        if not pfad.exists():
+            self.skipTest("keine Sprechernotizen")
+        v = json.loads(pfad.read_text(encoding="utf-8"))
+        for thema in alle_themen(self.daten):
+            if thema["id"] in v:
+                self.assertEqual(len(v[thema["id"]]["abschnitte"]), len(thema["zettel"]), thema["id"])
+
     def test_ids_eindeutig(self):
         ids = []
         for thema in alle_themen(self.daten):

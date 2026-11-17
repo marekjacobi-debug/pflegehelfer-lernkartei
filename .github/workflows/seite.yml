@@ -19,6 +19,16 @@ jobs:
       - uses: actions/checkout@v4
       - name: Prüfen (Daten bereinigt, Seite baut)
         run: python3 -m unittest discover -s tests -v
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Werkzeuge für Präsentationen (pptxgenjs, Chromium, Schriften)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-crosextra-carlito fonts-crosextra-caladea
+          npm install -g --no-fund --no-audit pptxgenjs@4.0.1 playwright@1.49.1
+          npx -y playwright@1.49.1 install --with-deps chromium
+      - name: Präsentationen bauen
+        run: ./praesentationen_bauen.sh
       - name: Seite bauen
         run: python3 bauen.py
       - name: Auf den Zweig gh-pages veröffentlichen

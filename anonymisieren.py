@@ -2,6 +2,7 @@
 
 Aufruf:
     python3 anonymisieren.py <Original-inhalte.json> daten/inhalte.json [--namen <Datei>]
+                             [--vortraege <Original-vortraege_alle.json> daten/vortraege.json]
 
 Die Original-Datei (aus Dropbox: "Claude Code/lernkartei/inhalte.json") kommt NIE ins Repo.
 Die Namen stehen auch nicht in diesem Skript: Es liest sie aus der Original-Datei
@@ -213,7 +214,11 @@ def pruefe_oeffentlich(daten):
 
 def main(argv):
     args = argv[1:]
-    namen_datei = None
+    namen_datei, vortraege = None, None
+    if "--vortraege" in args:
+        i = args.index("--vortraege")
+        vortraege = args[i + 1:i + 3]
+        del args[i:i + 3]
     if "--namen" in args:
         i = args.index("--namen")
         namen_datei = args[i + 1]
@@ -228,7 +233,10 @@ def main(argv):
     extra, ausgedacht, nur_titel = namensliste_lesen(namen_datei) if namen_datei else (set(), set(), set())
     with open(quelle, encoding="utf-8") as f:
         original = json.load(f)
+    if vortraege:  # Sprechernotizen mit denselben Regeln bereinigen (Namen kommen aus inhalte.json)
+        original = dict(original, _vortraege=json.load(open(vortraege[0], encoding="utf-8")))
     daten, bericht = anonymisieren(original, extra, ausgedacht, nur_titel)
+    vortraege_daten = daten.pop("_vortraege", None)
     if bericht["verdacht"]:
         print("NICHTS GESCHRIEBEN – diese Namen stehen außerhalb der Fallbeispiele und sind unbekannt:",
               *("Frau/Herr " + n for n in bericht["verdacht"]),
@@ -241,6 +249,11 @@ def main(argv):
     with open(ziel, "w", encoding="utf-8") as f:
         json.dump(daten, f, ensure_ascii=False, separators=(",", ":"))
         f.write("\n")
+    if vortraege:
+        with open(vortraege[1], "w", encoding="utf-8") as f:
+            json.dump(vortraege_daten, f, ensure_ascii=False, separators=(",", ":"))
+            f.write("\n")
+        print(f"geschrieben: {vortraege[1]} ({len(vortraege_daten)} Sprechernotizen)")
     themen = sum(1 for _ in alle_themen(daten))
     print(f"geschrieben: {ziel} ({themen} Themen)")
     print(f"Lehrkräfte erkannt: {bericht['namen']}  ·  Ersetzungen: {bericht['treffer'] or 'keine'}")

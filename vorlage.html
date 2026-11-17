@@ -314,6 +314,7 @@ dialog.druck::backdrop{background:rgba(10,25,20,.45)}
       <button role="tab" id="tab-ueben" aria-selected="false" data-view="ueben">Üben</button>
       <button role="tab" id="tab-pruefung" aria-selected="false" data-view="pruefung">Prüfung</button>
       <button role="tab" id="tab-lehrplan" aria-selected="false" data-view="lehrplan">Lehrplan</button>
+      <button role="tab" id="tab-praes" aria-selected="false" data-view="praes" hidden>Präsentationen</button>
     </nav>
   </div>
 </header>
@@ -325,6 +326,7 @@ dialog.druck::backdrop{background:rgba(10,25,20,.45)}
   <section id="view-ueben" hidden></section>
   <section id="view-pruefung" hidden></section>
   <section id="view-lehrplan" hidden></section>
+  <section id="view-praes" hidden></section>
 </main>
 
 <script>
@@ -454,7 +456,7 @@ function scopeSelect(id,value,counter){
 }
 
 /* ---------- Navigation ---------- */
-var VIEWS=["uebersicht","karten","zettel","ueben","pruefung","lehrplan"],current="uebersicht";
+var VIEWS=["uebersicht","karten","zettel","ueben","pruefung","lehrplan","praes"],current="uebersicht";
 function show(view){
   current=view;
   document.querySelectorAll("nav.tabs button").forEach(function(b){b.setAttribute("aria-selected",b.dataset.view===view?"true":"false")});
@@ -467,6 +469,7 @@ function show(view){
   if(view==="ueben"&&!practice)renderPracticeStart();
   if(view==="pruefung"&&!exam)renderExamStart();
   if(view==="lehrplan")renderLehrplan();
+  if(view==="praes")renderPraes();
   window.scrollTo(0,0);
 }
 document.querySelectorAll("nav.tabs button").forEach(function(b){b.addEventListener("click",function(){show(b.dataset.view)})});
@@ -1277,6 +1280,43 @@ function renderLehrplan(){
   ]));
 }
 
+/* ---------- Präsentationen (nur auf der Webseite: PRAES kommt von bauen.py) ---------- */
+var praesSuche="";
+function praesUrl(pfad){return pfad.split("/").map(encodeURIComponent).join("/")}
+function renderPraes(){
+  var v=$("#view-praes");v.textContent="";
+  var map={};PRAES.dateien.forEach(function(d){map[d.id]=d});
+  v.appendChild(el("h2",{text:"Präsentationen"}));
+  v.appendChild(el("p",{class:"lead",text:"Zu jedem Thema eine fertige PowerPoint mit Sprechernotizen und Animationen – zum Vortragen oder Wiederholen. "+PRAES.dateien.length+" Präsentationen."}));
+  var kopf=el("div",{class:"searchbar"},[
+    el("input",{type:"search",id:"suche-praes",value:praesSuche,placeholder:"Lernfeldeinheit (z. B. 2.1 oder Mobilität) oder Thema","aria-label":"Präsentationen suchen",oninput:function(){praesSuche=this.value;filtern()}}),
+    PRAES.zip?el("a",{class:"btn primary",href:praesUrl(PRAES.zip.pfad),download:""},["Alle herunterladen (ZIP, "+PRAES.zip.mb+" MB)"]):null]);
+  v.appendChild(kopf);
+  var info=el("p",{class:"suchinfo","aria-live":"polite"});v.appendChild(info);
+  var liste=el("div",{});v.appendChild(liste);
+  C.lernfelder.forEach(function(lf){
+    var block=el("div",{class:"lf"},[el("div",{class:"lf-head"},[el("h2",{text:lf.titel})])]);var hat=false;
+    lf.einheiten.forEach(function(e){
+      var rga=rgaEinheit(e.id);
+      var eb=el("div",{class:"lfe"},[el("p",{class:"label",text:e.titel}),rga?el("p",{class:"rga",text:rga.titel}):null]);var eHat=false;
+      e.themen.forEach(function(t){var d=map[t.id];if(!d)return;eHat=hat=true;
+        eb.appendChild(el("div",{class:"topic","data-suche":suchNorm([lf.titel,"lf "+lf.id.replace(/^LF0?/,""),e.titel,"lf "+e.id,e.id,rga?rga.titel+" "+rga.inh:"",t.titel,t.tags.join(" ")].join(" "))},[
+          el("div",{style:"min-width:0"},[el("h3",{text:t.titel}),el("div",{class:"meta"},[el("span",{class:"mono",text:t.zettel.length+" Abschnitte · "+(t.grafiken||[]).length+" Grafiken · "+d.kb+" KB"})])]),
+          el("div",{class:"acts"},[el("a",{class:"btn sm primary",href:praesUrl(d.pfad),download:""},["Herunterladen"]),el("button",{class:"btn sm",onclick:function(){openSheet(t.id)}},["Lernzettel"])])]));
+      });
+      if(eHat)block.appendChild(eb);
+    });
+    if(hat)liste.appendChild(block);
+  });
+  function filtern(){
+    var w=suchNorm(praesSuche).trim().split(" ").filter(Boolean),n=0;
+    liste.querySelectorAll(".lf").forEach(function(lf){var lfS=false;lf.querySelectorAll(".lfe").forEach(function(eb){var eS=false;
+      eb.querySelectorAll(".topic").forEach(function(t){var h=t.getAttribute("data-suche");var ok=w.every(function(x){return h.indexOf(x)>=0});t.hidden=!ok;if(ok){eS=true;n++}});
+      eb.hidden=!eS;if(eS)lfS=true});lf.hidden=!lfS});
+    info.textContent=!w.length?"":n?n+(n===1?" Präsentation":" Präsentationen"):"Keine Treffer.";
+  }
+  filtern();
+}
 /* ---------- Start ---------- */
 var local=lsGet();if(local)P=mergeProgress(P,local);
 function boot(data){
@@ -1284,6 +1324,7 @@ function boot(data){
   var nL=Object.keys(lueckIndex).length+Object.keys(zuIndex).length;
   $("#stand").textContent=topics.length+" Themen · "+Object.keys(cardIndex).length+" Karten · "+Object.keys(quizIndex).length+" Quizfragen · "+nL+" Aufgaben · Stand "+fmtDate(C.stand);
   if(prefGet("gesehen")===null)prefSet("gesehen",C.stand);
+  if(typeof PRAES!=="undefined"&&PRAES.dateien&&PRAES.dateien.length)$("#tab-praes").hidden=false;else VIEWS=VIEWS.filter(function(v){return v!=="praes"});
   tagFilter=prefGet("tag")||null;var tab=prefGet("tab");show(tab&&VIEWS.indexOf(tab)>=0?tab:"uebersicht");
   setTimeout(function(){prefSet("gesehen",C.stand)},4000);
   connectCaps();
