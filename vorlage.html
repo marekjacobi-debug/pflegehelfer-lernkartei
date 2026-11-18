@@ -83,6 +83,13 @@ select,input[type=text],input[type=search],textarea{background:var(--surface);co
 .boxes .n{font-size:.78rem}
 .legend{font-size:.8rem;color:var(--muted);margin:8px 0 0}
 .lf{margin-top:30px}
+.pro-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:14px}
+.pro-grid .panel h3{margin:0 0 4px;font-size:1.05rem}
+.pro-grid .panel .sub{font-size:.84rem;color:var(--muted);margin-bottom:8px}
+.pro-grid .tl{display:flex;flex-wrap:wrap;gap:6px}
+.pro-grid .tl .btn{text-align:left;white-space:normal}
+.pro-auch{font-size:.8rem;color:var(--muted);margin:10px 0 4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.pro-merk{margin:6px 0 0;padding-left:20px;font-size:.9rem;color:var(--muted)}
 .lf-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:6px}
 .lf-head h2{margin:0}
 .lf-head .mono{color:var(--muted);font-size:.85rem}
@@ -311,6 +318,7 @@ dialog.druck::backdrop{background:rgba(10,25,20,.45)}
       <button role="tab" id="tab-uebersicht" aria-selected="true" data-view="uebersicht">Übersicht</button>
       <button role="tab" id="tab-karten" aria-selected="false" data-view="karten">Karteikarten</button>
       <button role="tab" id="tab-zettel" aria-selected="false" data-view="zettel">Lernzettel</button>
+      <button role="tab" id="tab-prophy" aria-selected="false" data-view="prophy">Prophylaxen</button>
       <button role="tab" id="tab-ueben" aria-selected="false" data-view="ueben">Üben</button>
       <button role="tab" id="tab-pruefung" aria-selected="false" data-view="pruefung">Prüfung</button>
       <button role="tab" id="tab-praes" aria-selected="false" data-view="praes" hidden>Präsentationen</button>
@@ -323,6 +331,7 @@ dialog.druck::backdrop{background:rgba(10,25,20,.45)}
   <section id="view-uebersicht"></section>
   <section id="view-karten" hidden></section>
   <section id="view-zettel" hidden></section>
+  <section id="view-prophy" hidden></section>
   <section id="view-ueben" hidden></section>
   <section id="view-pruefung" hidden></section>
   <section id="view-lehrplan" hidden></section>
@@ -457,7 +466,7 @@ function scopeSelect(id,value,counter){
 }
 
 /* ---------- Navigation ---------- */
-var VIEWS=["uebersicht","karten","zettel","ueben","pruefung","lehrplan","praes"],current="uebersicht";
+var VIEWS=["uebersicht","karten","zettel","prophy","ueben","pruefung","lehrplan","praes"],current="uebersicht";
 function show(view){
   current=view;
   document.querySelectorAll("nav.tabs button").forEach(function(b){b.setAttribute("aria-selected",b.dataset.view===view?"true":"false")});
@@ -467,6 +476,7 @@ function show(view){
   if(view==="uebersicht")renderOverview();
   if(view==="karten"&&!session)renderCardStart();
   if(view==="zettel")renderSheets();
+  if(view==="prophy")renderProphy();
   if(view==="ueben"&&!practice)renderPracticeStart();
   if(view==="pruefung"&&!exam)renderExamStart();
   if(view==="lehrplan")renderLehrplan();
@@ -480,6 +490,7 @@ function rerender(){
   else if(current==="ueben"&&!practice)renderPracticeStart();
   else if(current==="pruefung"&&!exam)renderExamStart();
   else if(current==="lehrplan")renderLehrplan();
+  else if(current==="prophy")renderProphy();
 }
 
 /* ---------- Übersicht ---------- */
@@ -1317,6 +1328,74 @@ function renderPraes(){
     info.textContent=!w.length?"":n?n+(n===1?" Präsentation":" Präsentationen"):"Keine Treffer.";
   }
   filtern();
+}
+/* ---------- Prophylaxen: alle Prophylaxen und wo sie in den Lernzetteln stehen ---------- */
+var PROPHY=[
+  ["Dekubitusprophylaxe",["dekubitus","druckgeschwür"],"Druckgeschwür durch Druck und Scherkräfte"],
+  ["Kontrakturenprophylaxe",["kontraktur"],"Gelenkversteifung durch Bewegungsmangel"],
+  ["Spitzfußprophylaxe",["spitzfuß"],"Sonderform der Kontraktur am Sprunggelenk"],
+  ["Intertrigoprophylaxe",["intertrigo","wundsein"],"Entzündung der Haut in Hautfalten"],
+  ["Thromboseprophylaxe",["thrombose"],"Blutgerinnsel in den Venen"],
+  ["Pneumonieprophylaxe",["pneumonie","atemübung"],"Lungenentzündung bei Bettlägerigkeit"],
+  ["Sturzprophylaxe",["sturz"],"Stürze und ihre Folgen verhindern"],
+  ["Soor- & Parotitisprophylaxe",["soor","parotitis","mundpflege"],"Pilzbefall im Mund, Entzündung der Ohrspeicheldrüse"],
+  ["Aspirationsprophylaxe",["aspiration","verschlucken"],"Verschlucken von Nahrung oder Flüssigkeit"],
+  ["Obstipationsprophylaxe",["obstipation","verstopfung"],"Verstopfung"],
+  ["Dehydratationsprophylaxe",["dehydratation","exsikkose","trinkmenge"],"Austrocknung durch zu wenig Flüssigkeit"],
+  ["Mangelernährung vorbeugen",["mangelernährung","unterernährung"],"Zu wenig Energie und Nährstoffe"]
+];
+function prophyFundstellen(ks){
+  var haupt=[],auch=[];
+  topics.forEach(function(t){t.zettel.forEach(function(z){
+    var h=z.h.toLowerCase(),txt=(h+" "+z.punkte.join(" ")).toLowerCase();
+    if(!ks.some(function(k){return txt.indexOf(k)>=0}))return;
+    var inTitel=ks.some(function(k){return t.titel.toLowerCase().indexOf(k)>=0||h.indexOf(k)>=0});
+    (inTitel?haupt:auch).push({t:t,h:z.h});
+  })});
+  return{haupt:haupt,auch:auch};
+}
+function openSheetAt(id,h){
+  openSheet(id);
+  setTimeout(function(){var z=[].slice.call(document.querySelectorAll("#view-zettel .sheet h4")).find(function(x){return x.textContent===h});if(z)z.scrollIntoView({block:"start"})},30);
+}
+function renderProphy(){
+  var v=$("#view-prophy");v.textContent="";
+  var ts=topics.filter(function(t){return t.tags.indexOf("Prophylaxen")>=0});
+  var nK=ts.reduce(function(a,t){return a+t.karten.length},0),nQ=ts.reduce(function(a,t){return a+t.quiz.length},0);
+  v.appendChild(el("h2",{text:"Prophylaxen"}));
+  v.appendChild(el("p",{class:"lead",text:"Alle Prophylaxen auf einen Blick: Was soll verhindert werden, und wo steht es in deinen Lernzetteln? Ein Klick springt direkt zum passenden Abschnitt."}));
+  v.appendChild(el("div",{class:"row",style:"display:flex;gap:8px;flex-wrap:wrap"},[
+    el("button",{class:"btn primary",disabled:!nK,onclick:function(){startSession("tag:Prophylaxen","alle")}},["Alle Prophylaxe-Karten lernen ("+nK+")"]),
+    el("button",{class:"btn",disabled:!nQ,onclick:function(){show("ueben");renderPracticeStart("tag:Prophylaxen")}},["Üben ("+nQ+" Quizfragen)"])
+  ]));
+  var grid=el("div",{class:"pro-grid"}),leer=[];
+  PROPHY.forEach(function(p){
+    var f=prophyFundstellen(p[1]);
+    if(!f.haupt.length&&!f.auch.length){leer.push(p[0]);return}
+    var btn=function(x,sm){return el("button",{class:"btn sm"+(sm?" link":""),title:x.t._e.id+" "+x.t.titel,onclick:function(){openSheetAt(x.t.id,x.h)}},[(sm?"↗ ":"")+x.t.titel+" · "+x.h])};
+    grid.appendChild(el("div",{class:"panel"},[
+      el("h3",{text:p[0]}),el("div",{class:"sub",text:p[2]}),
+      f.haupt.length?el("div",{class:"tl"},f.haupt.map(function(x){return btn(x,false)})):null,
+      f.auch.length?el("p",{class:"pro-auch",text:"Auch erwähnt in"}):null,
+      f.auch.length?el("div",{class:"tl"},f.auch.map(function(x){return btn(x,true)})):null
+    ]));
+  });
+  v.appendChild(el("div",{class:"lf"},[el("div",{class:"lf-head"},[el("h2",{text:"Alle Prophylaxen"})]),grid]));
+  if(leer.length)v.appendChild(el("p",{class:"legend",style:"margin-top:10px",text:"Noch nicht im Unterricht: "+leer.join(" · ")+". Sie erscheinen hier automatisch, sobald es Mitschriften dazu gibt."}));
+  var block=el("div",{class:"lf"},[el("div",{class:"lf-head"},[el("h2",{text:"Themen mit #Prophylaxen"}),el("span",{class:"mono",text:ts.length+" Themen"})])]);
+  ts.forEach(function(t){
+    var st=stats(t.karten),sicher=st.boxes[4]+st.boxes[5];
+    block.appendChild(el("div",{class:"topic"},[
+      el("div",{style:"min-width:0"},[el("h3",{text:t.titel}),
+        el("div",{class:"meta"},[el("span",{text:t._lf.titel+" · "+t._e.titel}),el("span",{class:"mono",text:sicher+"/"+st.n+" Karten sicher"})]),
+        el("ol",{class:"pro-merk"},t.merksaetze.map(function(m){return el("li",{text:m})}))]),
+      el("div",{class:"acts"},[
+        el("button",{class:"btn sm primary",onclick:function(){openSheet(t.id)}},["Lernzettel"]),
+        el("button",{class:"btn sm",onclick:function(){startSession("t:"+t.id,"alle")}},["Karten"]),
+        el("button",{class:"btn sm",onclick:function(){show("ueben");renderPracticeStart("t:"+t.id)}},["Üben"])])
+    ]));
+  });
+  v.appendChild(block);
 }
 /* ---------- Start ---------- */
 var local=lsGet();if(local)P=mergeProgress(P,local);
