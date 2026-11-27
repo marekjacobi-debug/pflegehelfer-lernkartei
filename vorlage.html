@@ -1,32 +1,44 @@
 <title>Pflegehelfer Lernkartei</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#eef1f8">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#090a10">
 <style>
 /* Layout: Kopfzeile mit Reitern, darunter eine Spalte (max. 980px). Übersicht = Karteikasten mit Fächern; Prüfung = Prüfungsbogen wie in der Schule. */
 :root{
-  --bg:#f2f5f3; --surface:#ffffff; --sunk:#e6ece9; --line:#cfd9d4;
-  --ink:#15302a; --muted:#566a63; --accent:#0b6e5f; --accent-ink:#ffffff; --accent-soft:#d5ebe5;
-  --good:#2f7d32; --good-soft:#dcefdc; --bad:#b23a2e; --bad-soft:#f6dedb; --warn:#9a6a00; --warn-soft:#f6ecd0;
-  --b1:#c9d4cf; --b2:#a6c9bd; --b3:#6fae9b; --b4:#2f8c77; --b5:#0b6e5f; --mark:#fff0a8;
-  --g-blau:#3d5a80; --g-blau-soft:#e2e8f1; --g-pink-soft:#f8e3ea;
-  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
-  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
-  --r:10px;
+  --bg:#eef1f8; --surface:#ffffff; --card:rgba(255,255,255,.82); --sunk:#e7e8ee; --line:rgba(60,60,67,.17);
+  --ink:#1c1c1e; --muted:#55555d; --accent:#0064d2; --accent-ink:#ffffff; --accent-soft:#e1eefd;
+  --good:#1a6f31; --good-soft:#e0f5e5; --bad:#bd1320; --bad-soft:#fde5e7; --warn:#835500; --warn-soft:#fff1cf;
+  --g-blau:#4745b0; --g-blau-soft:#ecebfc; --g-pink-soft:#fde6ee;
+  --b1:#c9d7e9; --b2:#9ec4f2; --b3:#66a7f2; --b4:#2686e8; --b5:#0064d2; --mark:#ffe58a;
+  --glass:rgba(255,255,255,.66); --glass-strong:rgba(255,255,255,.78); --seg:rgba(118,118,128,.13);
+  --glass-edge:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 .5px rgba(255,255,255,.7),0 0 0 .5px rgba(20,30,60,.10);
+  --glass-shadow:0 12px 32px -14px rgba(30,50,100,.30); --card-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 0 0 .5px rgba(20,30,60,.08),0 12px 30px -20px rgba(30,50,100,.28);
+  --blob1:rgba(0,122,255,.24); --blob2:rgba(110,90,240,.20); --blob3:rgba(60,190,215,.22);
+  --blur:saturate(180%) blur(22px);
+  --f-display:-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+  --f-body:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --f-mono:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --r:20px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#101a17; --surface:#16231f; --sunk:#1d2e29; --line:#2c413a;
-  --ink:#e4efea; --muted:#9db3ab; --accent:#4cc3a8; --accent-ink:#06211b; --accent-soft:#173a32;
-  --good:#7cc97f; --good-soft:#1c3320; --bad:#f08a7e; --bad-soft:#3a1f1c; --warn:#e3b54d; --warn-soft:#352b12;
-  --g-blau:#9db8dc; --g-blau-soft:#1e2a3a; --g-pink-soft:#3a2230;
-  --b1:#2c3d38; --b2:#2f5a4e; --b3:#3a8270; --b4:#45a68e; --b5:#4cc3a8; --mark:#5a4d12; color-scheme:dark}}
+  --bg:#090a10; --surface:#1c1c1e; --card:rgba(32,32,37,.84); --sunk:#2c2c31; --line:rgba(235,235,245,.17);
+  --ink:#f5f5f7; --muted:#a9a9b2; --accent:#4da3ff; --accent-ink:#00152e; --accent-soft:#11304f;
+  --good:#5fd47a; --good-soft:#12331c; --bad:#ff8078; --bad-soft:#401c1d; --warn:#ffc94d; --warn-soft:#3a2d0c;
+  --g-blau:#aeadff; --g-blau-soft:#26254a; --g-pink-soft:#3d2330;
+  --b1:#2c3a4f; --b2:#27507f; --b3:#2c6cb4; --b4:#3a8ae0; --b5:#4da3ff; --mark:#5a4d12;
+  --glass:rgba(40,40,48,.66); --glass-strong:rgba(58,58,68,.72); --seg:rgba(118,118,128,.24);
+  --glass-edge:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 .5px rgba(255,255,255,.12);
+  --glass-shadow:0 14px 34px -14px rgba(0,0,0,.75); --card-shadow:inset 0 0 0 .5px rgba(255,255,255,.09),0 12px 30px -18px rgba(0,0,0,.8);
+  --blob1:rgba(10,110,230,.30); --blob2:rgba(94,92,230,.26); --blob3:rgba(40,170,200,.18); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#101a17; --surface:#16231f; --sunk:#1d2e29; --line:#2c413a;
-  --ink:#e4efea; --muted:#9db3ab; --accent:#4cc3a8; --accent-ink:#06211b; --accent-soft:#173a32;
-  --good:#7cc97f; --good-soft:#1c3320; --bad:#f08a7e; --bad-soft:#3a1f1c; --warn:#e3b54d; --warn-soft:#352b12;
-  --g-blau:#9db8dc; --g-blau-soft:#1e2a3a; --g-pink-soft:#3a2230;
-  --b1:#2c3d38; --b2:#2f5a4e; --b3:#3a8270; --b4:#45a68e; --b5:#4cc3a8; --mark:#5a4d12; color-scheme:dark}
+  --bg:#090a10; --surface:#1c1c1e; --card:rgba(32,32,37,.84); --sunk:#2c2c31; --line:rgba(235,235,245,.17);
+  --ink:#f5f5f7; --muted:#a9a9b2; --accent:#4da3ff; --accent-ink:#00152e; --accent-soft:#11304f;
+  --good:#5fd47a; --good-soft:#12331c; --bad:#ff8078; --bad-soft:#401c1d; --warn:#ffc94d; --warn-soft:#3a2d0c;
+  --g-blau:#aeadff; --g-blau-soft:#26254a; --g-pink-soft:#3d2330;
+  --b1:#2c3a4f; --b2:#27507f; --b3:#2c6cb4; --b4:#3a8ae0; --b5:#4da3ff; --mark:#5a4d12;
+  --glass:rgba(40,40,48,.66); --glass-strong:rgba(58,58,68,.72); --seg:rgba(118,118,128,.24);
+  --glass-edge:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 .5px rgba(255,255,255,.12);
+  --glass-shadow:0 14px 34px -14px rgba(0,0,0,.75); --card-shadow:inset 0 0 0 .5px rgba(255,255,255,.09),0 12px 30px -18px rgba(0,0,0,.8);
+  --blob1:rgba(10,110,230,.30); --blob2:rgba(94,92,230,.26); --blob3:rgba(40,170,200,.18); color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;margin:0}
 .wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:0 56px}
@@ -306,6 +318,91 @@ dialog.druck::backdrop{background:rgba(10,25,20,.45)}
 .opts2 small{display:block;color:var(--muted);font-size:.8rem}
 .druck .info{font-size:.85rem;color:var(--muted)}
 .druck .acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+
+/* ---------- Liquid Glass ----------
+   Glas (Unschärfe) nur auf Bedienelementen über dem Inhalt; Lerntexte liegen auf fast deckenden Flächen. */
+body{-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
+  radial-gradient(60vmax 50vmax at 8% -6%,var(--blob1),transparent 70%),
+  radial-gradient(55vmax 55vmax at 102% 24%,var(--blob2),transparent 70%),
+  radial-gradient(65vmax 50vmax at 28% 108%,var(--blob3),transparent 70%)}
+h2,h3,.brand h1{letter-spacing:-.022em}
+h2,.brand h1,.today .big,.done .big,.grade .note,.lp-sum .big{font-weight:700}
+:focus-visible{border-radius:8px}
+
+/* Kopfleiste und Reiter */
+header.top{background:none;border:0;padding:10px 12px 0}
+.top-inner{position:relative;padding-block:10px;align-items:center;border-radius:28px}
+.top-inner::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--glass-edge),var(--glass-shadow)}
+.brand{padding:0}
+nav.tabs{position:relative;background:var(--seg);border-radius:999px;padding:4px}
+nav.tabs button{flex:none;font-size:.9rem;font-weight:600;border:0;border-radius:999px;padding:7px 13px;transition:background-color .2s,box-shadow .2s,color .2s}
+nav.tabs button[aria-selected="true"]{background:var(--glass-strong);color:var(--accent);box-shadow:var(--glass-edge),0 3px 10px -3px rgba(0,0,0,.22)}
+nav.tabs button:focus-visible{outline-offset:-3px;border-radius:999px}
+.sec h4{scroll-margin-top:150px}
+
+/* Buttons, Auswahl, Eingaben */
+.btn,.modes button,.tagbar button,.bank button{background:var(--glass-strong);border-color:transparent;box-shadow:var(--glass-edge),0 6px 16px -10px rgba(20,40,90,.35);transition:transform .15s,filter .15s,background-color .2s}
+.btn{font-weight:600}
+.btn:active:not(:disabled),.modes button:active,.tagbar button:active,.bank button:active:not(.used){transform:scale(.96)}
+.btn:hover:not(:disabled),.tagbar button:hover,.modes button:hover{border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
+.btn.primary{background:var(--accent);border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 10px 22px -10px var(--accent)}
+.btn.no{background:var(--bad-soft);border-color:color-mix(in srgb,var(--bad) 45%,transparent)}
+.btn.yes{background:var(--good-soft);border-color:color-mix(in srgb,var(--good) 45%,transparent)}
+.btn.link{border-color:var(--line)}
+.bank button{border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.modes button{border-radius:18px;padding:12px 16px}
+.tagbar button{font-weight:600}
+select,input[type=text],input[type=search],textarea{border-radius:14px;background:var(--glass-strong);border-color:transparent;box-shadow:var(--glass-edge)}
+select:focus-visible,textarea:focus-visible,input:focus-visible{border-radius:14px}
+.searchbar input,.suche input[type=search]{border-radius:999px;padding:12px 18px;-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--glass-edge),var(--glass-shadow)}
+
+/* Inhaltsflächen */
+.panel,.sheet,.exam,.cloze,.fall,.face,.opt,.hit,.match .pair{background-color:var(--card);border:1px solid transparent;border-radius:var(--r);box-shadow:var(--card-shadow)}
+.face{border-radius:28px}
+.face.back{background-color:var(--accent-soft)}
+.opt,.hit,.match .pair{border-radius:18px}
+.opt.right{background-color:var(--good-soft)}
+.opt.wrong{background-color:var(--bad-soft)}
+.opt.chosen{background-color:var(--accent-soft)}
+.match .pair.right{background-color:var(--good-soft)}
+.match .pair.wrong{background-color:var(--bad-soft)}
+.grafik{border:0;border-radius:18px;box-shadow:0 0 0 1px var(--line)}
+.merk,.esel,.note,.explain,.newbanner,.compare>div,.fall .sit,.fall .loes,.opts2{border-radius:16px}
+.merk,.esel{border-left:0}
+.lf-head{border-bottom:1px solid var(--line)}
+.stack,.qbar,.lp-bar{background:var(--seg)}
+.timer,.pts,.lp-unit .nr{font-variant-numeric:tabular-nums}
+.toc{background:var(--glass);border-radius:24px;padding:12px;top:140px;max-height:calc(100vh - 156px);box-shadow:var(--glass-edge),var(--glass-shadow)}
+.toc button{border-radius:12px}
+
+/* Druck-Dialog */
+dialog.druck{border:0;border-radius:30px;background:var(--glass-strong);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--glass-edge),0 30px 70px -24px rgba(0,0,0,.5)}
+dialog.druck::backdrop{background:rgba(10,14,30,.34);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.artwahl label{border-radius:18px;background:var(--card)}
+.artwahl label:has(input:checked){background:var(--accent-soft)}
+
+/* Handy: schwebende Reiterleiste unten */
+@media (max-width:640px){
+  header.top{position:static;padding-top:calc(10px + env(safe-area-inset-top,0px))}
+  .top-inner{padding-block:12px;border-radius:24px}
+  nav.tabs{position:fixed;z-index:20;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));max-width:none;bottom:calc(10px + env(safe-area-inset-bottom,0px));padding:6px;background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--glass-edge),0 12px 34px -8px rgba(10,20,50,.4);overscroll-behavior-x:contain}
+  nav.tabs button{font-size:.86rem;padding:11px 14px}
+  .wrap{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+  .toc{top:auto;max-height:none;padding:10px}
+  .sec h4{scroll-margin-top:12px}
+}
+
+/* Ohne Unschärfe oder bei „Transparenz reduzieren“: deckende Flächen */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .top-inner::before,nav.tabs,dialog.druck{background:var(--surface)}
+}
+@media (prefers-reduced-transparency:reduce){
+  body::before{display:none}
+  .top-inner::before,nav.tabs,.toc,dialog.druck,.btn:not(.primary):not(.yes):not(.no),.modes button:not([aria-pressed="true"]),.tagbar button:not([aria-pressed="true"]),select,input,textarea{background:var(--surface);-webkit-backdrop-filter:none;backdrop-filter:none}
+  .panel,.sheet,.exam,.cloze,.fall,.face.front,.hit{background-color:var(--surface)}
+}
+@media (prefers-reduced-motion:reduce){.btn,.modes button,.tagbar button,.bank button,nav.tabs button{transition:none}}
 </style>
 
 <header class="top">
@@ -473,6 +570,7 @@ function show(view){
   VIEWS.forEach(function(v){$("#view-"+v).hidden=v!==view});
   document.body.classList.toggle("breit",view==="zettel");
   prefSet("tab",view);
+  var akt=$('nav.tabs button[data-view="'+view+'"]');if(akt)akt.parentNode.scrollLeft=akt.offsetLeft-(akt.parentNode.clientWidth-akt.offsetWidth)/2;
   if(view==="uebersicht")renderOverview();
   if(view==="karten"&&!session)renderCardStart();
   if(view==="zettel")renderSheets();

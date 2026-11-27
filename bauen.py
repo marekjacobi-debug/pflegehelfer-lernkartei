@@ -58,7 +58,7 @@ def seite_bauen(vorlage, inhalte, ziel):
     if praes:
         kopf = "<script>var PRAES=" + json.dumps(praes, ensure_ascii=False).replace("</", "<\\/") + ";</script>\n"
     seite = ('<!doctype html>\n<html lang="de"><head><meta charset="utf-8">'
-             '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
+             '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
              + kopf + seite + "\n</body></html>\n")
     ziel.parent.mkdir(parents=True, exist_ok=True)
     ziel.write_text(seite, encoding="utf-8")
