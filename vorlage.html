@@ -41,9 +41,9 @@
   --blob1:rgba(10,110,230,.30); --blob2:rgba(94,92,230,.26); --blob3:rgba(40,170,200,.18); color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;margin:0}
-.wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:0 56px}
+.wrap{max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:0 56px}
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
-.top-inner{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:14px 0;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 20px}
+.top-inner{max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:14px 0;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 20px}
 .brand{display:flex;flex-direction:column;gap:2px;padding-bottom:12px;min-width:0}
 .brand h1{font-family:var(--f-display);font-weight:800;font-size:1.45rem;letter-spacing:-.01em;margin:0;line-height:1.1}
 .brand small{color:var(--muted);font-size:.82rem}
@@ -117,8 +117,8 @@ select,input[type=text],input[type=search],textarea{background:var(--surface);co
 
 /* Karteikarten */
 .stage{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:18px}
-.progressline{width:100%;max-width:640px;display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted)}
-.card{width:100%;max-width:640px;min-height:300px;perspective:1400px;cursor:pointer;border:0;background:none;padding:0;color:inherit;text-align:left}
+.progressline{width:100%;display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted)}
+.card{width:100%;min-height:300px;perspective:1400px;cursor:pointer;border:0;background:none;padding:0;color:inherit;text-align:left}
 .card-inner{position:relative;width:100%;min-height:300px;transition:transform .45s cubic-bezier(.3,.7,.3,1);transform-style:preserve-3d;display:grid}
 .card.flipped .card-inner{transform:rotateY(180deg)}
 .face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px 26px 20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 1px 0 var(--line),0 10px 24px -18px rgba(0,0,0,.35)}
@@ -129,9 +129,9 @@ select,input[type=text],input[type=search],textarea{background:var(--surface);co
 .face .hint{font-size:.8rem;color:var(--muted)}
 .lines{background-image:repeating-linear-gradient(to bottom,transparent 0 31px,var(--line) 31px 32px);background-position:0 8px}
 @media (prefers-reduced-motion:reduce){.card-inner{transition:none}}
-.typebox{width:100%;max-width:640px;display:flex;flex-direction:column;gap:10px}
+.typebox{width:100%;display:flex;flex-direction:column;gap:10px}
 .typebox textarea{width:100%;min-height:90px;resize:vertical}
-.compare{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;width:100%;max-width:640px}
+.compare{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;width:100%}
 .compare>div{border-radius:10px;padding:12px 14px;background:var(--sunk);min-width:0}
 .compare>div.sol{background:var(--accent-soft)}
 @media (max-width:560px){.compare{grid-template-columns:1fr}}
@@ -171,7 +171,6 @@ mark{background:var(--mark);color:inherit;border-radius:2px;padding:0 1px}
 .merkall .grpt{font-family:var(--f-display);font-weight:600;font-size:1rem;margin:16px 0 6px}
 .merkall .merk{margin-bottom:8px}.merkall .merk .label{text-transform:none;letter-spacing:0;font-size:.92rem}
 .merkall button.lnk{background:none;border:0;padding:0;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;text-align:left}
-body.breit .wrap,body.breit .top-inner{max-width:1280px}
 .sec.mitgrafik .bild{grid-column:2;margin-top:10px;display:grid;gap:12px;max-width:900px}
 .sec.mitgrafik .bild .grafik{margin:0}
 @media (max-width:560px){.sec.mitgrafik .bild{grid-column:1}}
@@ -188,7 +187,7 @@ body.breit .wrap,body.breit .top-inner{max-width:1280px}
 .modes button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .modes b{display:block;font-family:var(--f-display);font-weight:600}
 .modes span{font-size:.82rem;color:var(--muted)}
-.quiz{max-width:700px;margin:10px auto 0}
+.quiz{margin:10px auto 0}
 .qhead{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:.85rem;margin-bottom:8px}
 .qbar{height:6px;background:var(--sunk);border-radius:999px;overflow:hidden;margin-bottom:18px}
 .qbar span{display:block;height:100%;background:var(--accent)}
@@ -230,7 +229,7 @@ body.breit .wrap,body.breit .top-inner{max-width:1280px}
 .tablewrap{overflow-x:auto}
 
 /* Prüfung */
-.exam{max-width:760px;margin:16px auto 0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:26px 26px 30px}
+.exam{margin:16px auto 0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:26px 26px 30px}
 .exam-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:8px}
 .exam-head h2{margin:0;font-size:1.4rem}
 .exam-head .meta{font-size:.85rem;color:var(--muted)}
@@ -381,6 +380,10 @@ dialog.druck{border:0;border-radius:30px;background:var(--glass-strong);-webkit-
 dialog.druck::backdrop{background:rgba(10,14,30,.34);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .artwahl label{border-radius:18px;background:var(--card)}
 .artwahl label:has(input:checked){background:var(--accent-soft)}
+
+/* Breiter Bildschirm */
+@media (min-width:900px){.card,.card-inner{min-height:400px}.face{padding:32px 36px 26px}.face .q{font-size:1.8rem}.face .a{font-size:1.4rem}}
+@media (min-width:1100px){.toc{top:100px;max-height:calc(100vh - 116px)}.sec h4{scroll-margin-top:104px}}
 
 /* Handy: schwebende Reiterleiste unten */
 @media (max-width:640px){
@@ -568,7 +571,6 @@ function show(view){
   current=view;
   document.querySelectorAll("nav.tabs button").forEach(function(b){b.setAttribute("aria-selected",b.dataset.view===view?"true":"false")});
   VIEWS.forEach(function(v){$("#view-"+v).hidden=v!==view});
-  document.body.classList.toggle("breit",view==="zettel");
   prefSet("tab",view);
   var akt=$('nav.tabs button[data-view="'+view+'"]');if(akt)akt.parentNode.scrollLeft=akt.offsetLeft-(akt.parentNode.clientWidth-akt.offsetWidth)/2;
   if(view==="uebersicht")renderOverview();
@@ -728,7 +730,7 @@ function renderCard(){
   var stage=el("div",{class:"stage"},[el("div",{class:"progressline"},[el("span",{class:"mono",text:done+" / "+session.total}),el("span",{text:b?"Fach "+b:"neue Karte"})])]);
   if(session.typ==="tippen"){
     var ta=el("textarea",{id:"typed","aria-label":"Deine Antwort",placeholder:"Deine Antwort …"});
-    stage.appendChild(el("div",{class:"face front lines",style:"width:100%;max-width:640px;min-height:180px"},[el("div",{class:"kicker"},[el("span",{text:t._e.id+" · "+t.titel}),el("span",{text:"Frage"})]),el("div",{class:"q",text:k.f})]));
+    stage.appendChild(el("div",{class:"face front lines",style:"width:100%;min-height:180px"},[el("div",{class:"kicker"},[el("span",{text:t._e.id+" · "+t.titel}),el("span",{text:"Frage"})]),el("div",{class:"q",text:k.f})]));
     var box=el("div",{class:"typebox",id:"typebox"},[ta,el("div",{class:"answer-row"},[el("button",{class:"btn primary",id:"check-typed",onclick:function(){reveal(ta.value)}},["Antwort prüfen ",el("span",{class:"kbd",text:"⌘↵"})])])]);
     ta.addEventListener("keydown",function(e){if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)){e.preventDefault();reveal(ta.value)}});
     stage.appendChild(box);
