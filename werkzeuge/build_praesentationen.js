@@ -15,15 +15,24 @@ const AUTOR = process.env.AUTOR || ""; // öffentliche Fassung: kein Name
 const GRAFIKEN = process.env.GRAFIKEN || path.join(path.dirname(path.resolve(inhaltePfad)), "grafiken");
 
 const THEME = {
-  name: "Pflegehelfer Referat",
-  headFontFace: "Cambria",
+  name: "Pflegehelfer Liquid Glass",
+  headFontFace: "Calibri",
   bodyFontFace: "Calibri",
   colors: {
-    dk1: "17312B", lt1: "FFFFFF", dk2: "0B3D35", lt2: "EAF3F0",
-    accent1: "0B6E5F", accent2: "E07A5F", accent3: "7FB5A6", accent4: "F2C14E",
-    accent5: "3D5A80", accent6: "8AA39B", hlink: "0B6E5F", folHlink: "5E7A72",
+    dk1: "1D1D1F", lt1: "FFFFFF", dk2: "0B2A4A", lt2: "EAF3FF",
+    accent1: "0066CC", accent2: "E5710F", accent3: "6AC4DC", accent4: "FFC933",
+    accent5: "5856D6", accent6: "6E6E73", hlink: "0066CC", folHlink: "5856D6",
   },
 };
+// Liquid Glass: weiche Farbverläufe als Hintergrund, Karten als helles Glas mit weicher Kante
+const HG_HELL = path.join(__dirname, "hintergrund_hell.png");
+const HG_DUNKEL = path.join(__dirname, "hintergrund_dunkel.png");
+// jedes Mal ein neues Objekt – pptxgenjs verändert die übergebenen Optionen
+const glas = (farbe) => ({
+  fill: { color: farbe, transparency: 22 },
+  line: { color: farbe, width: 1.25 },
+  shadow: { type: "outer", color: "1E3264", opacity: 0.16, blur: 14, offset: 4, angle: 90 },
+});
 const W = 10, H = 5.625, M = 0.55;
 
 function linesFor(text, wIn, pt) {
@@ -61,8 +70,9 @@ function baueDeck(lf, e, t, v) {
 
   pres.defineSlideMaster({
     title: "Titel dunkel",
-    background: { color: C.text2 },
+    background: { path: HG_DUNKEL },
     objects: [
+      { text: { text: "", options: { shape: pres.shapes.ROUNDED_RECTANGLE, x: M - 0.27, y: 0.72, w: 7.0, h: 4.25, rectRadius: 0.28, fill: { color: "FFFFFF", transparency: 90 }, line: { color: "FFFFFF", width: 1, transparency: 65 } } } },
       { placeholder: { options: { name: "kicker", type: "body", x: M, y: 1.05, w: 6.2, h: 0.4, fontSize: 13, color: C.accent3, bold: true, charSpacing: 1, margin: 0 }, text: "" } },
       { placeholder: { options: { name: "title", type: "title", x: M, y: 1.5, w: 6.4, h: 1.9, fontSize: 36, bold: true, color: C.background1, valign: "top", align: "left", margin: 0, fontFace: THEME.headFontFace }, text: "" } },
       { placeholder: { options: { name: "untertitel", type: "body", x: M, y: 3.75, w: 6.2, h: 0.9, fontSize: 15, color: C.background2, valign: "top", margin: 0 }, text: "" } },
@@ -70,7 +80,7 @@ function baueDeck(lf, e, t, v) {
   });
   pres.defineSlideMaster({
     title: "Inhalt",
-    background: { color: C.background1 },
+    background: { path: HG_HELL },
     margin: [0.5, 0.55, 0.55, 0.55],
     objects: [
       { placeholder: { options: { name: "title", type: "title", x: M, y: 0.35, w: W - 2 * M, h: 0.75, fontSize: 28, bold: true, color: C.text2, valign: "middle", align: "left", margin: 0, fontFace: THEME.headFontFace }, text: "" } },
@@ -84,9 +94,9 @@ function baueDeck(lf, e, t, v) {
     slide.addText(String(nummer), { x, y, w: d, h: d, align: "center", valign: "middle", fontSize: Math.round(d * 30), bold: true, color: farbe, margin: 0, isTextBox: true, fontFace: THEME.headFontFace, objectName: name + " Zahl" });
   }
   function deko(slide) {
-    slide.addShape(pres.shapes.OVAL, { x: 6.9, y: 0.6, w: 4.2, h: 4.2, fill: { color: C.accent1 }, line: { color: C.accent1 }, objectName: "Deko Kreis groß" });
-    slide.addShape(pres.shapes.OVAL, { x: 7.6, y: 3.3, w: 1.6, h: 1.6, fill: { color: C.accent2 }, line: { color: C.accent2 }, objectName: "Deko Kreis klein" });
-    slide.addShape(pres.shapes.OVAL, { x: 8.75, y: 0.25, w: 0.75, h: 0.75, fill: { color: C.accent4 }, line: { color: C.accent4 }, objectName: "Deko Punkt" });
+    slide.addShape(pres.shapes.OVAL, { x: 6.9, y: 0.6, w: 4.2, h: 4.2, fill: { color: C.accent1, transparency: 35 }, line: { color: "FFFFFF", width: 1.25, transparency: 45 }, objectName: "Deko Kreis groß" });
+    slide.addShape(pres.shapes.OVAL, { x: 7.6, y: 3.3, w: 1.6, h: 1.6, fill: { color: C.accent2, transparency: 12 }, line: { color: "FFFFFF", width: 1.25, transparency: 45 }, objectName: "Deko Kreis klein" });
+    slide.addShape(pres.shapes.OVAL, { x: 8.75, y: 0.25, w: 0.75, h: 0.75, fill: { color: C.accent4, transparency: 5 }, line: { color: "FFFFFF", width: 1.25, transparency: 45 }, objectName: "Deko Punkt" });
   }
 
   // 1 Titel
@@ -104,7 +114,7 @@ function baueDeck(lf, e, t, v) {
   const n = t.zettel.length, zweiSp = n > 4, proSp = zweiSp ? Math.ceil(n / 2) : n;
   const spW = zweiSp ? (W - 2 * M - 0.4) / 2 : 5.4;
   if (!zweiSp) {
-    s.addShape(pres.shapes.OVAL, { x: 6.55, y: 1.35, w: 2.9, h: 2.9, fill: { color: C.background2 }, line: { color: C.background2 }, objectName: "Gliederung Kreis" });
+    s.addShape(pres.shapes.OVAL, { x: 6.55, y: 1.35, w: 2.9, h: 2.9, ...glas(C.background1), objectName: "Gliederung Kreis" });
     s.addText([{ text: String(n), options: { fontSize: 66, bold: true, color: C.accent1, fontFace: THEME.headFontFace, breakLine: true } }, { text: "Abschnitte", options: { fontSize: 16, color: C.text2 } }], { x: 6.55, y: 1.35, w: 2.9, h: 2.9, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: "Gliederung Anzahl" });
   }
   const zeileH = Math.min(0.78, 3.6 / proSp);
@@ -123,7 +133,7 @@ function baueDeck(lf, e, t, v) {
     s.addText([{ text: `${i + 1}  `, options: { color: C.accent2 } }, { text: sauber(z.h) }], { placeholder: "title" });
     const P = z.punkte.map(sauber), k = P.length, top = 1.3, bottom = H - 0.6, hAll = bottom - top;
     if (k === 1) {
-      s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: M, y: top + 0.2, w: W - 2 * M, h: hAll - 0.5, fill: { color: C.background2 }, line: { color: C.background2 }, rectRadius: 0.15, objectName: "Kernaussage Fläche" });
+      s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: M, y: top + 0.2, w: W - 2 * M, h: hAll - 0.5, ...glas(C.background1), rectRadius: 0.24, objectName: "Kernaussage Fläche" });
       kreis(s, M + 0.35, top + 0.2 + (hAll - 0.5) / 2 - 0.4, 0.8, "!", C.accent2, C.background1, "Kernaussage Symbol");
       const pt = fitPt(P, W - 2 * M - 1.8, hAll - 0.9, [24, 22, 20, 18, 16]);
       s.addText(P[0], { x: M + 1.45, y: top + 0.4, w: W - 2 * M - 1.8, h: hAll - 0.9, fontSize: pt, color: C.text2, valign: "middle", margin: 0, isTextBox: true, objectName: "Kernaussage" });
@@ -132,7 +142,7 @@ function baueDeck(lf, e, t, v) {
       const pt = fitPt(P, cw - 0.5, ch - 1.15, [22, 20, 18, 16, 15, 14, 13, 12]);
       P.forEach((p, j) => {
         const x = M + j * (cw + gap);
-        s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y: top, w: cw, h: ch, fill: { color: C.background2 }, line: { color: C.background2 }, rectRadius: 0.12, objectName: `Karte ${j + 1}` });
+        s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y: top, w: cw, h: ch, ...glas(C.background1), rectRadius: 0.2, objectName: `Karte ${j + 1}` });
         kreis(s, x + 0.25, top + 0.25, 0.6, j + 1, j % 2 ? C.accent2 : C.accent1, C.background1, `Karte ${j + 1} Nummer`);
         s.addText(p, { x: x + 0.25, y: top + 1.05, w: cw - 0.5, h: ch - 1.2, fontSize: pt, color: C.text1, valign: "top", margin: 0, isTextBox: true, objectName: `Karte ${j + 1} Text` });
       });
@@ -142,7 +152,7 @@ function baueDeck(lf, e, t, v) {
       const pt = fitPt(P, tw, ch - 0.16, [19, 18, 17, 16, 15, 14, 13, 12, 11]);
       P.forEach((p, j) => {
         const c = j % 2, r = Math.floor(j / 2), x = M + c * (cw + 0.3), y = top + r * (ch + gap);
-        s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y, w: cw, h: ch, fill: { color: C.background2 }, line: { color: C.background2 }, rectRadius: 0.1, objectName: `Feld ${j + 1}` });
+        s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y, w: cw, h: ch, ...glas(C.background1), rectRadius: 0.16, objectName: `Feld ${j + 1}` });
         kreis(s, x + 0.18, y + (ch - d) / 2, d, j + 1, C.accent1, C.background1, `Feld ${j + 1} Nummer`);
         s.addText(p, { x: x + d + 0.33, y: y + 0.08, w: tw, h: ch - 0.16, fontSize: pt, color: C.text1, valign: "middle", margin: 0, isTextBox: true, objectName: `Feld ${j + 1} Text` });
       });
@@ -169,14 +179,13 @@ function baueDeck(lf, e, t, v) {
   // 4 Das Wichtigste
   pres.addSection({ title: "Abschluss" });
   s = pres.addSlide({ masterName: "Inhalt", sectionTitle: "Abschluss" });
-  s.background = { color: C.background2 };
   s.addText("Das Wichtigste in Kürze", { placeholder: "title" });
   {
     const cw = (W - 2 * M - 0.6) / 3, ch = 3.25, y = 1.35;
     const pt = fitPt(v.merksaetze, cw - 0.5, ch - 1.4, [18, 17, 16, 15, 14]);
     v.merksaetze.forEach((m, j) => {
       const x = M + j * (cw + 0.3);
-      s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y, w: cw, h: ch, fill: { color: C.background1 }, line: { color: C.background1 }, rectRadius: 0.12, shadow: { type: "outer", color: "0B3D35", opacity: 0.12, blur: 8, offset: 2, angle: 90 }, objectName: `Merksatz ${j + 1} Karte` });
+      s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y, w: cw, h: ch, ...glas(C.background1), rectRadius: 0.2, objectName: `Merksatz ${j + 1} Karte` });
       s.addText(String(j + 1), { x: x + 0.25, y: y + 0.15, w: 1, h: 0.9, fontSize: 48, bold: true, color: [C.accent1, C.accent2, C.accent5][j], margin: 0, isTextBox: true, fontFace: THEME.headFontFace, objectName: `Merksatz ${j + 1} Zahl` });
       s.addText(m, { x: x + 0.25, y: y + 1.15, w: cw - 0.5, h: ch - 1.35, fontSize: pt, color: C.text2, bold: true, valign: "top", margin: 0, isTextBox: true, objectName: `Merksatz ${j + 1}` });
     });
